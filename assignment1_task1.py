@@ -1,5 +1,5 @@
 '''
-Ask the user yo inout three number and check if these numbers can form a triangle.
+Ask the user to input three number and check if these numbers can form a triangle.
 -> Need three inputs
 -> The output shows whether the result can form a triangle or not
 '''
