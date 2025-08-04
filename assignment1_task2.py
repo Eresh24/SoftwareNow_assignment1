@@ -1,5 +1,10 @@
 # Group 24 Assignment 1 Task 2
 
+"""
+Assignment 1 Task 2: Draw a hollow square of a given size.
+
+Our Understanding: To draw a hollow square, we need to print asterisks (*) for the borders and spaces for the inner part of the square.
+"""
 # Function to draw a hollow square of given size 
 def drawSquare(size: int) -> None:
     for row in range(size):
