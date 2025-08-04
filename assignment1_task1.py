@@ -11,7 +11,7 @@ Our Understanding: To verify if three sides can form a triangle, we need to chec
 # Function to verify if three sides can form a triangle
 def verifyTriangle(a: int, b: int, c: int) -> None:
     if a <= 0 or b <= 0 or c <= 0:
-        print("Sides must be positive integers.")
+        print("Sides must be positive numbers.")
         return
 
     if a + b > c and a + c > b and b + c > a:
@@ -20,20 +20,24 @@ def verifyTriangle(a: int, b: int, c: int) -> None:
         print(f"The sides {a}, {b}, and {c} cannot form a triangle.")
 
 # Function to get a valid integer input from the user
-def getIntegerInput(prompt: str) -> int:
+def getFloatInput(prompt: str) -> float:
     while True:
         user_input = input(prompt).strip()
-        if user_input.isdigit():
-            return int(user_input)
-        else:
-            print("Invalid input. Please enter a valid positive integer.")
+        try:
+            value = float(user_input)
+            if value > 0:
+                return value
+            else:
+                print("Please enter a number greater than 0.")
+        except ValueError:
+            print("Invalid input. Please enter a valid positive number.")
 
 # Main function to run the program
 def main():
     print("Welcome to the Triangle Verifier! Group 24 Assignment 1 Task 1")
-    a = getIntegerInput("Enter the length of side a: ")
-    b = getIntegerInput("Enter the length of side b: ")
-    c = getIntegerInput("Enter the length of side c: ")
+    a = getFloatInput("Enter the length of side a: ")
+    b = getFloatInput("Enter the length of side b: ")
+    c = getFloatInput("Enter the length of side c: ")
 
     verifyTriangle(a, b, c)
 
