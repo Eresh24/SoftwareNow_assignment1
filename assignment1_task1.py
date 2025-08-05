@@ -1,21 +1,23 @@
 '''
-Ask the user to input three number and check if these numbers can form a triangle.
+Ask the user to input three numbers and check if these numbers can form a triangle.
 -> Need three inputs
 -> The output shows whether the result can form a triangle or not
 '''
 
-#Take sides from user
+# Take sides from user
+side1 = float(input("Enter first side: ")) 
+side2 = float(input("Enter second side: "))
+side3 = float(input("Enter third side: "))
 
-side1=float(input("Enter first side:")) 
-side2=float(input("Enter second side:"))
-side3=float( input("Enter third side:"))
-
-# by default sorts the input in asceding order
-sides = sorted([side1,side2,side3])
-
-# Now calculate if sum of smaller two sides > largest side
-
-if sides[0] + sides[1] > sides[2]:
-    print("Yes, they can form triangle")
+# Check that all sides are positive
+if side1 <= 0 or side2 <= 0 or side3 <= 0:
+    print("Invalid input: All sides must be positive numbers.")
 else:
-    print("NO, they cannot form triangle")
+    # Sort the sides in ascending order
+    sides = sorted([side1, side2, side3])
+
+    # Check if the sum of the two smaller sides is greater than the largest
+    if sides[0] + sides[1] > sides[2]:
+        print("Yes, they can form a triangle.")
+    else:
+        print("No, they cannot form a triangle.")
