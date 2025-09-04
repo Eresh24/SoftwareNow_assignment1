@@ -81,7 +81,7 @@ def decrypt_text(text, shift1, shift2):
             decrypted_text += char
     return decrypted_text
 
-#fiunction to verify decryption
+#function to verify decryption
 def verify_decryption(original_file, decrypted_file):
     with open(original_file, "r") as f1, open(decrypted_file, "r") as f2:
         original = f1.read()
