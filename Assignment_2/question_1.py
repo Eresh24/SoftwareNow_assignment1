@@ -34,87 +34,75 @@ When run, your program should automatically:
 
 '''
 
+
+import os
 import string
 
-#function to encrypt text
 def encrypt_text(text, shift1, shift2):
     encrypted_text = ""
-    # iterate through each character in the text
     for i, char in enumerate(text):
-        
         if char.islower():
-            # alternate between shift1 and shift2
             shift = shift1 if i % 2 == 0 else shift2
-            
-            # to handle wrap-around using modulo operation
-            new_char = chr((ord(char) - ord('a') + shift) % 26 + ord('a'))
-            encrypted_text += new_char
-            
-        # to handle uppercase letters    
+            encrypted_text += chr((ord(char) - ord('a') + shift) % 26 + ord('a'))
         elif char.isupper():
             shift = shift1 if i % 2 == 0 else shift2
-            new_char = chr((ord(char) - ord('A') + shift) % 26 + ord('A'))
-            encrypted_text += new_char
+            encrypted_text += chr((ord(char) - ord('A') + shift) % 26 + ord('A'))
         else:
             encrypted_text += char
     return encrypted_text
 
-#function to decrypt text
 def decrypt_text(text, shift1, shift2):
     decrypted_text = ""
     for i, char in enumerate(text):
         if char.islower():
-            
-            # alternate between shift1 and shift2 
             shift = shift1 if i % 2 == 0 else shift2
-            new_char = chr((ord(char) - ord('a') - shift) % 26 + ord('a'))
-            decrypted_text += new_char
-        
-        # to handle uppercase letters
+            decrypted_text += chr((ord(char) - ord('a') - shift) % 26 + ord('a'))
         elif char.isupper():
-            
-            #to alternate between shift1 and shift2 
             shift = shift1 if i % 2 == 0 else shift2
-            new_char = chr((ord(char) - ord('A') - shift) % 26 + ord('A'))
-            decrypted_text += new_char
+            decrypted_text += chr((ord(char) - ord('A') - shift) % 26 + ord('A'))
         else:
             decrypted_text += char
     return decrypted_text
 
-#function to verify decryption
 def verify_decryption(original_file, decrypted_file):
+    if not os.path.exists(original_file) or not os.path.exists(decrypted_file):
+        print("Verification failed: One of the files does not exist.")
+        return
+
     with open(original_file, "r") as f1, open(decrypted_file, "r") as f2:
-        original = f1.read()
-        decrypted = f2.read()
-        if original == decrypted:
+        if f1.read() == f2.read():
             print("Decryption successful: Files match.")
         else:
             print("Decryption failed: Files do not match.")
-
 
 def main():
     shift1 = int(input("Enter shift1 value: "))
     shift2 = int(input("Enter shift2 value: "))
 
+    # Check if raw_text.txt exists
+    if not os.path.exists("raw_text.txt"):
+        print("Error: 'raw_text.txt' does not exist. Please create it first.")
+        return
+
     # Read raw text
     with open("raw_text.txt", "r") as f:
         raw_text = f.read()
 
-    # Encrypt
+    # Encrypt and write to file (overwrite if exists)
     encrypted_text = encrypt_text(raw_text, shift1, shift2)
     with open("encrypted_text.txt", "w") as f:
         f.write(encrypted_text)
-    print("'encrypted_text.txt' created.")
+    print("'encrypted_text.txt' created/overwritten.")
 
-    # Decrypt
+    # Decrypt and write to file (overwrite if exists)
     decrypted_text = decrypt_text(encrypted_text, shift1, shift2)
     with open("decrypted_text.txt", "w") as f:
         f.write(decrypted_text)
-    print("'decrypted_text.txt' created.")
+    print("'decrypted_text.txt' created/overwritten.")
 
-    # Verify
+    # Verify decryption
     verify_decryption("raw_text.txt", "decrypted_text.txt")
-
 
 if __name__ == "__main__":
     main()
+
