@@ -1,163 +1,142 @@
+'''
+Create a program that uses a recursive function to generate a geometric pattern using
+Python's turtle graphics. The pattern starts with a regular polygon and recursively
+modifies each edge to create intricate designs.
+Pattern Generation Rules:
+For each edge of the shape:
+1. Divide the edge into three equal segments
+2. Replace the middle segment with two sides of an equilateral triangle pointing
+inward (creating an indentation)
+3. This transforms one straight edge into four smaller edges, each 1/3 the length of
+the original edge
+4. Apply this same process recursively to each of the four new edges based on the
+specified depth
+Visual Example:
+Depth 0: Draw a straight line: ———— (no modification)
+Depth 1: Line becomes: ——\⁄—— (indentation pointing inward)
+
+Depth 2: Each of the 4 segments from depth 1 gets its own indentation
+User Input Parameters:
+The program should prompt the user for:
+Number of sides: Determines the starting shape
+Side length: The length of each edge of the initial polygon in pixels
+Recursion depth: How many times to apply the pattern rules
+Example Execution:
+Enter the number of sides: 4
+Enter the side length: 300
+Enter the recursion depth: 3
+'''
+
+
 import turtle
+import math
 
-def draw_edge(turtle_obj, length, depth):
-    """
-    Draw a single edge with recursive pattern.
-    
-    This function either draws a straight line (depth 0) or creates
-    a pattern by dividing the line into 4 segments with an indentation.
-    
-    Parameters:
-    - turtle_obj: The turtle object to draw with
-    - length: How long the edge should be
-    - depth: How many times to apply the pattern (0 = straight line)
-    """
-    
-    # Base case: if depth is 0, just draw a straight line
+def draw_koch_segment(t, x0, y0, x1, y1, depth):
+    """Recursively draw a Koch segment with INWARD indentations using Turtle"""
     if depth == 0:
-        turtle_obj.forward(length)
+        t.goto(x1, y1)
         return
-    
-    # Recursive case: create the pattern
-    # Divide the line into 3 equal parts
-    segment = length / 3
-    
-    # Draw the 4 segments that make up the pattern:
-    # 1. First segment (1/3 of original length)
-    draw_edge(turtle_obj, segment, depth - 1)
-    
-    # 2. Turn left and draw second segment (creates the indent)
-    turtle_obj.left(60)
-    draw_edge(turtle_obj, segment, depth - 1)
-    
-    # 3. Turn right and draw third segment (completes the indent)
-    turtle_obj.right(120)
-    draw_edge(turtle_obj, segment, depth - 1)
-    
-    # 4. Turn left to face original direction and draw final segment
-    turtle_obj.left(60)
-    draw_edge(turtle_obj, segment, depth - 1)
 
+    # Divide the segment into three equal parts
+    dx = (x1 - x0) / 3
+    dy = (y1 - y0) / 3
 
-def get_number_input(prompt, min_val, max_val):
-    """
-    Get a number from user with error handling.
+    # Calculate the five key points
+    xA, yA = x0, y0                    # Start point
+    xB, yB = x0 + dx, y0 + dy          # First 1/3 point
+    xD, yD = x0 + 2*dx, y0 + 2*dy      # Second 2/3 point
+    xE, yE = x1, y1                    # End point
+
+    # Calculate the peak of the triangle (pointing INWARD)
+    # For inward triangle, we rotate by +60 degrees (π/3) instead of -60 degrees
+    angle = math.atan2(dy, dx) + math.pi / 3  # Changed from - to + for inward
+    length = math.hypot(dx, dy)
+    xC = xB + math.cos(angle) * length
+    yC = yB + math.sin(angle) * length
+
+    # Recursively draw the four segments
+    draw_koch_segment(t, xA, yA, xB, yB, depth - 1)  # First segment
+    draw_koch_segment(t, xB, yB, xC, yC, depth - 1)  # Left side of triangle
+    draw_koch_segment(t, xC, yC, xD, yD, depth - 1)  # Right side of triangle
+    draw_koch_segment(t, xD, yD, xE, yE, depth - 1)  # Last segment
+
+def draw_koch_polygon(sides, length, depth):
+    """Draw a Koch polygon with inward indentations"""
+    # Calculate the radius of the circumscribed circle
+    angle = 2 * math.pi / sides
+    radius = length / (2 * math.sin(math.pi / sides))
+
+    # Calculate vertices of the regular polygon
+    # Add a rotation offset to align the polygon properly
+    # For a square, rotate by π/4 (45 degrees) to make it sit flat
+    rotation_offset = math.pi / 4  # 45 degrees clockwise rotation
+    vertices = []
+    for i in range(sides):
+        x = radius * math.sin(i * angle + rotation_offset)
+        y = -radius * math.cos(i * angle + rotation_offset)
+        vertices.append((x, y))
+
+    # Setup Turtle graphics
+    screen = turtle.Screen()
+    screen.setup(800, 800)
+    screen.bgcolor("white")
+    screen.title(f"Inward Koch Pattern - {sides} sides, depth {depth}")
     
-    Parameters:
-    - prompt: What to ask the user
-    - min_val: Minimum allowed value
-    - max_val: Maximum allowed value
+    t = turtle.Turtle()
+    t.speed(0)  # Fastest drawing speed
+    t.color("black")
+    t.pensize(1)
     
-    Returns: A valid integer between min_val and max_val
-    """
-    while True:
-        try:
-            # Get input from user
-            value = input(prompt)
-            
-            # Try to convert to integer
-            number = int(value)
-            
-            # Check if it's in the valid range
-            if min_val <= number <= max_val:
-                return number
-            else:
-                print(f"Please enter a number between {min_val} and {max_val}")
-                
-        except ValueError:
-            # This happens if user enters something that's not a number
-            print("Please enter a valid number")
-        except KeyboardInterrupt:
-            # This happens if user presses Ctrl+C
-            print("\nProgram cancelled by user")
-            exit()
+    # Start drawing from the first vertex
+    t.penup()
+    t.goto(vertices[0])
+    t.pendown()
 
+    # Draw each edge of the polygon with Koch modification
+    for i in range(sides):
+        x0, y0 = vertices[i]
+        x1, y1 = vertices[(i + 1) % sides]
+        draw_koch_segment(t, x0, y0, x1, y1, depth)
 
-def draw_pattern():
-    """
-    Main function that gets user input and draws the pattern.
-    """
+    t.hideturtle()
+    
+    # Keep the window open
+    screen.exitonclick()
+    print("Click on the graphics window to close it.")
+
+def main():
+    """Main function to get user input and generate the pattern"""
+    print("Geometric Pattern Generator (Inward Koch Pattern)")
     print("=" * 50)
-    print("RECURSIVE POLYGON PATTERN GENERATOR")
-    print("=" * 50)
-    print("This program draws shapes where each edge has a repeating pattern.")
-    print("The pattern creates indentations that repeat at smaller scales.")
-    print()
     
     try:
-        # Get input from user with error checking
-        print("Let's set up your pattern:")
-        print()
-        
-        sides = get_number_input(
-            "How many sides should the shape have? (3-8): ", 
-            3, 8
-        )
-        
-        length = get_number_input(
-            "How long should each side be? (100-400 pixels): ", 
-            100, 400
-        )
-        
-        depth = get_number_input(
-            "How detailed should the pattern be? (0-3): ", 
-            0, 3
-        )
-        
-        print()
-        print(f"Drawing a {sides}-sided shape...")
-        print(f"Side length: {length} pixels")
-        print(f"Pattern detail level: {depth}")
-        print("Close the drawing window when you're done looking at it.")
-        print()
-        
-        # Set up the drawing window
-        screen = turtle.Screen()
-        screen.setup(800, 600)  # Window size
-        screen.bgcolor("white")
-        screen.title(f"Koch Snowflake - {sides} sides, depth {depth}")
-        
-        # Create and set up the turtle
-        pen = turtle.Turtle()
-        pen.speed(5)  # Medium speed so you can see it draw
-        pen.color("blue")
-        pen.pensize(2)
-        
-        # Move to a good starting position
-        pen.penup()
-        pen.goto(-length//2, 0)  # Start a bit to the left of center
-        pen.pendown()
-        
-        # Calculate how much to turn after each side
-        angle = 360 / sides
-        
-        # Draw each side of the polygon
-        for side_num in range(sides):
-            print(f"Drawing side {side_num + 1}...")
+        sides = int(input("Enter the number of sides: "))
+        if sides < 3:
+            print("Number of sides must be at least 3!")
+            return
             
-            # Draw one side with the recursive pattern
-            draw_edge(pen, length, depth)
+        length = float(input("Enter the side length: "))
+        if length <= 0:
+            print("Side length must be positive!")
+            return
             
-            # Turn right to prepare for the next side
-            pen.right(angle)
+        depth = int(input("Enter the recursion depth: "))
+        if depth < 0:
+            print("Recursion depth must be non-negative!")
+            return
+            
+        print(f"\nGenerating pattern with:")
+        print(f"- Sides: {sides}")
+        print(f"- Side length: {length}")
+        print(f"- Recursion depth: {depth}")
+        print("\nDrawing pattern... Please wait.")
         
-        print("Drawing complete!")
-        print("Click on the drawing window to close it.")
+        draw_koch_polygon(sides, length, depth)
         
-        # Hide the turtle and wait for click to close
-        pen.hideturtle()
-        screen.exitonclick()
-        
-    except Exception as error:
-        # Catch any unexpected errors
-        print(f"Something went wrong: {error}")
-        print("Please try running the program again.")
-    
-    except KeyboardInterrupt:
-        # Handle Ctrl+C gracefully
-        print("\nProgram stopped by user.")
+    except ValueError:
+        print("Please enter valid numbers!")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-
-# This is where the program starts running
 if __name__ == "__main__":
-    draw_pattern()
+    main()
