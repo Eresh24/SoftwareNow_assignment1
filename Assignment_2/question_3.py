@@ -26,45 +26,68 @@ Enter the number of sides: 4
 Enter the side length: 300
 Enter the recursion depth: 3
 '''
+import matplotlib.pyplot as plt
+import math
 
-import turtle
-
-# Recursive function to draw one edge with fractal indentation
-def draw_fractal_edge(length, depth):
+def draw_koch_segment(x0, y0, x1, y1, depth, coords):
+    """Recursively compute points for a Koch segment"""
     if depth == 0:
-        turtle.forward(length)
-    else:
-        segment = length / 3.0
-        
-        draw_fractal_edge(segment, depth - 1)
-        
-        turtle.left(60)
-        draw_fractal_edge(segment, depth - 1)
-        
-        turtle.right(120)
-        draw_fractal_edge(segment, depth - 1)
-        
-        turtle.left(60)
-        draw_fractal_edge(segment, depth - 1)
+        coords.append((x1, y1))
+        return
+    
+    dx = (x1 - x0) / 3
+    dy = (y1 - y0) / 3
+    
+    xA, yA = x0, y0
+    xB, yB = x0 + dx, y0 + dy
+    xD, yD = x0 + 2*dx, y0 + 2*dy
+    xE, yE = x1, y1
+    
+    # Peak of the triangle
+    angle = math.atan2(dy, dx) - math.pi/3
+    length = math.hypot(dx, dy)
+    xC = xB + math.cos(angle) * length
+    yC = yB + math.sin(angle) * length
+    
+    draw_koch_segment(xA, yA, xB, yB, depth-1, coords)
+    draw_koch_segment(xB, yB, xC, yC, depth-1, coords)
+    draw_koch_segment(xC, yC, xD, yD, depth-1, coords)
+    draw_koch_segment(xD, yD, xE, yE, depth-1, coords)
+
+def draw_koch_polygon(sides, length, depth):
+    """Draw a Koch polygon and display it in a window"""
+    angle = 2 * math.pi / sides
+    radius = length / (2 * math.sin(math.pi / sides))
+    
+    vertices = []
+    for i in range(sides):
+        x = radius * math.sin(i * angle)
+        y = -radius * math.cos(i * angle)
+        vertices.append((x, y))
+    
+    all_coords = []
+    for i in range(sides):
+        x0, y0 = vertices[i]
+        x1, y1 = vertices[(i+1)%sides]
+        edge_coords = [(x0, y0)]
+        draw_koch_segment(x0, y0, x1, y1, depth, edge_coords)
+        all_coords.extend(edge_coords)
+    
+    X, Y = zip(*all_coords)
+    
+    plt.figure(figsize=(8, 8))
+    plt.plot(X, Y, color="blue")
+    plt.axis("equal")
+    plt.axis("off")
+    plt.show()  # Display the window
 
 def main():
-    # User input
+    print("Geometric Pattern Generator")
     sides = int(input("Enter the number of sides: "))
-    side_length = int(input("Enter the side length: "))
-    depth = int(input("Enter the recursion depth (recommend ≤ 5): "))
-
-    # Setup turtle
-    turtle.speed(0)          # Fastest speed
-    turtle.hideturtle()
-    turtle.tracer(False)     # Disable animation for speed
-
-    # Draw polygon with fractal edges
-    for _ in range(sides):
-        draw_fractal_edge(side_length, depth)
-        turtle.right(360 / sides)
-
-    turtle.tracer(True)      # Re-enable animation
-    turtle.done()
+    length = float(input("Enter the side length: "))
+    depth = int(input("Enter the recursion depth: "))
+    
+    draw_koch_polygon(sides, length, depth)
 
 if __name__ == "__main__":
     main()
