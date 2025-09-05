@@ -29,64 +29,68 @@ Enter the recursion depth: 3
 import matplotlib.pyplot as plt
 import math
 
-def draw_koch_segment(x0, y0, x1, y1, depth, coords):
-    """Recursively compute points for a Koch segment"""
+import turtle
+import math
+
+def draw_koch_segment(t, x0, y0, x1, y1, depth):
+    """Recursively draw a Koch segment using Turtle"""
     if depth == 0:
-        coords.append((x1, y1))
+        t.goto(x1, y1)
         return
-    
+
     dx = (x1 - x0) / 3
     dy = (y1 - y0) / 3
-    
+
     xA, yA = x0, y0
     xB, yB = x0 + dx, y0 + dy
     xD, yD = x0 + 2*dx, y0 + 2*dy
     xE, yE = x1, y1
-    
+
     # Peak of the triangle
-    angle = math.atan2(dy, dx) - math.pi/3
+    angle = math.atan2(dy, dx) - math.pi / 3
     length = math.hypot(dx, dy)
     xC = xB + math.cos(angle) * length
     yC = yB + math.sin(angle) * length
-    
-    draw_koch_segment(xA, yA, xB, yB, depth-1, coords)
-    draw_koch_segment(xB, yB, xC, yC, depth-1, coords)
-    draw_koch_segment(xC, yC, xD, yD, depth-1, coords)
-    draw_koch_segment(xD, yD, xE, yE, depth-1, coords)
+
+    draw_koch_segment(t, xA, yA, xB, yB, depth - 1)
+    draw_koch_segment(t, xB, yB, xC, yC, depth - 1)
+    draw_koch_segment(t, xC, yC, xD, yD, depth - 1)
+    draw_koch_segment(t, xD, yD, xE, yE, depth - 1)
 
 def draw_koch_polygon(sides, length, depth):
-    """Draw a Koch polygon and display it in a window"""
+    """Draw a Koch polygon in Turtle window"""
     angle = 2 * math.pi / sides
     radius = length / (2 * math.sin(math.pi / sides))
-    
+
+    # Compute vertices
     vertices = []
     for i in range(sides):
         x = radius * math.sin(i * angle)
         y = -radius * math.cos(i * angle)
         vertices.append((x, y))
-    
-    all_coords = []
+
+    # Setup Turtle
+    t = turtle.Turtle()
+    t.speed(0)
+    t.penup()
+    t.goto(vertices[0])
+    t.pendown()
+
+    # Draw each edge
     for i in range(sides):
         x0, y0 = vertices[i]
-        x1, y1 = vertices[(i+1)%sides]
-        edge_coords = [(x0, y0)]
-        draw_koch_segment(x0, y0, x1, y1, depth, edge_coords)
-        all_coords.extend(edge_coords)
-    
-    X, Y = zip(*all_coords)
-    
-    plt.figure(figsize=(8, 8))
-    plt.plot(X, Y, color="blue")
-    plt.axis("equal")
-    plt.axis("off")
-    plt.show()  # Display the window
+        x1, y1 = vertices[(i + 1) % sides]
+        draw_koch_segment(t, x0, y0, x1, y1, depth)
+
+    t.hideturtle()
+    turtle.done()
 
 def main():
-    print("Geometric Pattern Generator")
+    print("Geometric Pattern Generator (Turtle Version)")
     sides = int(input("Enter the number of sides: "))
     length = float(input("Enter the side length: "))
     depth = int(input("Enter the recursion depth: "))
-    
+
     draw_koch_polygon(sides, length, depth)
 
 if __name__ == "__main__":
